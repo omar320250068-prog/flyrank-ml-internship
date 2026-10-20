@@ -1,0 +1,54 @@
+{
+  "notebook": "capstone",
+  "split": "GroupKFold(5) by client_id, seed 42",
+  "n": 12023,
+  "n_clients": 28,
+  "base_rate": 0.193,
+  "label": "under_capturing = (ctr_vs_tier < 0.50) & (impressions_90d >= 1000)",
+  "results": [
+    {
+      "method": "baseline_rule",
+      "P@20": 0.3,
+      "P@50": 0.22,
+      "P@100": 0.24,
+      "ROC_AUC": 0.653,
+      "AP": 0.246
+    },
+    {
+      "method": "logreg",
+      "P@20": 0.65,
+      "P@50": 0.58,
+      "P@100": 0.56,
+      "ROC_AUC": 0.607,
+      "AP": 0.265
+    },
+    {
+      "method": "tree_d2",
+      "P@20": 0.45,
+      "P@50": 0.5,
+      "P@100": 0.49,
+      "ROC_AUC": 0.712,
+      "AP": 0.328
+    },
+    {
+      "method": "tree_d3",
+      "P@20": 0.65,
+      "P@50": 0.66,
+      "P@100": 0.63,
+      "ROC_AUC": 0.744,
+      "AP": 0.404
+    },
+    {
+      "method": "random_forest",
+      "P@20": 0.45,
+      "P@50": 0.6,
+      "P@100": 0.64,
+      "ROC_AUC": 0.777,
+      "AP": 0.436
+    }
+  ],
+  "c2_split_gap": {
+    "rf_random_P@50": 0.92,
+    "rf_grouped_P@50": 0.6
+  }
+}

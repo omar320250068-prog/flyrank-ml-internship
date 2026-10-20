@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Which Pages Should a Reviewer Look at First? A Client-Grouped Decision-Support Ranker for CTR Under-Capture</title>
+<meta name="author" content="Omar Hindawy">
+<meta name="description" content="A decision-support research paper built on the FlyRank ML Internship dataset: a client-grouped, leakage-audited ranker that orders content pages by a proxy for organic click under-capture.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#eef1f6;color:#161a22}
+a{color:#0d2a5e}
+.paper{max-width:820px;margin:0 auto;background:#fdfdfb;min-height:100vh;
+  padding:44px 54px 90px;font:18px/1.68 'Source Serif 4',Georgia,serif}
+
+/* header */
+.p-head{border-bottom:2px solid #161a22;padding-bottom:20px;margin-bottom:26px}
+.p-venue{font:600 12px/1.5 Inter,system-ui,sans-serif;letter-spacing:.13em;color:#5a6472;
+  text-transform:uppercase;margin:0 0 14px}
+.paper h1{font:700 30px/1.24 'Source Serif 4',Georgia,serif;margin:0 0 12px;letter-spacing:-.01em;
+  font-size:clamp(23px,5.2vw,30px)}
+.p-byline{font:14.5px/1.55 Inter,system-ui,sans-serif;color:#5a6472;margin:0}
+.p-byline a{color:#0d2a5e}
+
+/* abstract */
+.p-abstract{background:#f2f4f0;border-left:3px solid #0d2a5e;padding:18px 22px;margin:0 0 30px}
+.p-abstract h2{margin:0 0 9px;font-size:17px;color:#161a22;font-family:Inter,sans-serif;
+  letter-spacing:.02em}
+.p-abstract p{font-size:16.5px;margin:0;text-align:justify;hyphens:auto}
+.p-abstract b{color:#0d2a5e}
+
+/* toc */
+.p-toc{font:14.5px/1.9 Inter,system-ui,sans-serif;background:#f7f8f5;border:1px solid #e3e7ee;
+  border-radius:8px;padding:14px 20px;margin:0 0 34px}
+.p-toc b{font-size:12px;letter-spacing:.1em;color:#5a6472;text-transform:uppercase;display:block;margin-bottom:6px}
+.p-toc ol{margin:0;padding-left:20px;columns:2;column-gap:26px}
+.p-toc a{text-decoration:none;color:#0d2a5e}
+
+/* sections */
+.paper h2{font:700 21px/1.3 'Source Serif 4',Georgia,serif;margin:36px 0 12px;color:#0d2a5e;
+  padding-top:6px}
+.paper h3{font:700 17px/1.3 'Source Serif 4',Georgia,serif;margin:22px 0 7px;color:#161a22}
+.paper h4{font:700 12px Inter,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#5a6472;margin:0 0 8px}
+.paper p{margin:0 0 13px;text-align:justify;hyphens:auto}
+.paper ol,.paper ul{margin:0 0 14px;padding-left:26px}
+.paper li{margin-bottom:8px}
+.paper code{font:13.5px/1.5 'Space Mono',ui-monospace,monospace;background:#eef1f6;padding:1px 6px;border-radius:4px}
+.paper pre{font:12.5px/1.65 'Space Mono',ui-monospace,monospace;background:#f2f4f0;
+  border:1px solid #e0e4da;padding:13px 15px;overflow-x:auto;margin:0 0 14px;border-radius:6px}
+
+/* tables */
+.paper table{width:100%;border-collapse:collapse;font:14px/1.45 Inter,system-ui,sans-serif;margin:16px 0 22px}
+.paper caption{caption-side:top;text-align:left;font:13.5px/1.55 Inter,system-ui,sans-serif;
+  color:#3a4353;padding-bottom:9px}
+.paper th{border-top:2px solid #161a22;border-bottom:1px solid #161a22;text-align:left;padding:8px 11px;font-weight:600}
+.paper td{border-bottom:1px solid #d8dce3;padding:8px 11px;vertical-align:top}
+.paper tbody tr:last-child td{border-bottom:2px solid #161a22}
+.paper tr.win td{background:#e8f3ec;font-weight:600}
+.paper td.num{font-variant-numeric:tabular-nums}
+
+/* figures */
+.paper figure{margin:20px 0 24px;padding:14px;border:1px solid #e3e7ee;background:#fff;border-radius:6px}
+.paper figure img{width:100%;height:auto;display:block;border-radius:3px}
+.paper figcaption{font:13.5px/1.58 Inter,system-ui,sans-serif;color:#3a4353;margin-top:11px}
+
+/* callouts */
+.p-call{background:#fff8ec;border-left:3px solid #c05621;padding:13px 18px;margin:0 0 20px;
+  font-size:16px}
+.p-call b{color:#8a3b0f}
+.p-ladder{background:#f2f4f0;border:1px solid #e0e4da;border-radius:8px;padding:14px 20px;margin:0 0 22px;font-size:16px}
+
+/* repro */
+.p-repro{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.p-links{font:14.5px/1.9 Inter,system-ui,sans-serif;color:#5a6472}
+
+/* ack + footer */
+.p-ack{margin-top:38px;border-top:1px solid #d8dce3;padding-top:16px}
+.p-ack h2{font-size:17px;margin-top:0}
+.p-ack p,.p-ack li{font-size:14.5px}
+.p-foot{margin-top:26px;font:13px/1.6 Inter,system-ui,sans-serif;color:#8a93a3;text-align:center}
+
+@media (max-width:640px){
+  .paper{padding:26px 20px 60px;font-size:17px}
+  .p-toc ol{columns:1}
+  .p-repro{grid-template-columns:1fr}
+  .paper p{text-align:left}
+}
+</style>
+</head>
+<body>
+<article class="paper" aria-label="Research paper">
+
+  <header class="p-head">
+    <p class="p-venue">FlyRank ML Internship · Applied Search Intelligence · Lane 4 — CTR / Engagement Opportunity Scoring · 2026</p>
+    <h1>Which Pages Should a Reviewer Look at First? A Client-Grouped Decision-Support Ranker for Organic CTR Under-Capture</h1>
+    <p class="p-byline">Omar Hindawy · built on the anonymised FlyRank ML Internship starter dataset ·
+      <a href="https://github.com/omar320250068-prog/flyrank-ml-internship">source repository</a></p>
+  </header>
+
+  <section class="p-abstract">
+    <h2>Abstract</h2>
+    <p><b>Question.</b> A content team can review only a limited number of pages per cycle, so the useful
+    decision is the <i>order</i> of that review: which pages look like they capture fewer clicks than
+    their search position should earn? <b>Data.</b> We use the pseudonymised FlyRank ML Internship
+    starter release — 30,000 content pages across 32 clients — restricted to a decision-relevant slice
+    of <b>12,023 pages across 28 clients</b> with at least 500 ninety-day impressions and a known
+    position on page one or striking distance. <b>Method.</b> We define a transparent <i>proxy</i>
+    label for under-capture (click-through rate below half the median for its position tier) and compare
+    a hand rule against logistic regression, shallow decision trees, and a random forest, using each
+    model's probability as a ranking score on <b>identical client-grouped folds</b>. <b>Result.</b> A
+    random forest has the highest observed ranking quality (precision@50 of <b>0.60</b> versus the
+    rule's 0.22 and a base rate of 0.19), but the same model scores 0.92 under a random split — the
+    <b>0.32 gap</b> is the memorisation the grouping removes. <b>Use.</b> The output is a ranked,
+    human-reviewed <i>review queue</i> with reason codes and a no-go list: decision-support for
+    prioritising human attention, not an automated action and not a causal claim.</p>
+  </section>
+
+  <nav class="p-toc">
+    <b>Contents</b>
+    <ol>
+      <li><a href="#intro">Introduction &amp; problem</a></li>
+      <li><a href="#data">Data</a></li>
+      <li><a href="#method">Methodology</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#interp">Interpretation</a></li>
+      <li><a href="#limits">Limitations</a></li>
+      <li><a href="#recs">Ranked recommendations</a></li>
+      <li><a href="#repro">Reproducibility</a></li>
+      <li><a href="#ack">Acknowledgments &amp; data credit</a></li>
+    </ol>
+  </nav>
+
+  <section id="intro">
+    <h2>1&nbsp;&nbsp;Introduction &amp; problem</h2>
+    <p>A page can earn impressions for weeks while capturing fewer clicks than its position should
+    justify — a quiet loss that no dashboard alarm flags. The practical decision is not "will this page
+    decline?" in the abstract; it is <b>"which pages should a person look at first this cycle?"</b> when
+    the review budget is a few dozen rows, not the whole portfolio.</p>
+    <p>This paper reports a <b>decision-support ranker</b> for that queue, evaluated the way it would be
+    used. The unit of analysis is <b>one content page</b> for one client at a single snapshot; the output
+    is a <b>ranked score</b>; the action a human takes is <b>inspect-and-decide</b> on the head of the
+    queue; and the cost of a wrong call is a wasted review slot — bounded, because a person still checks
+    every page before anything changes.</p>
+    <p>We make three testable claims, each tied to evidence and to the skill's claim ladder:</p>
+    <ol>
+      <li><b>C1 (model beats rule, measured).</b> On identical client-grouped folds, the random forest
+      ranks above the hand rule at every reported K (precision@50 0.60 vs 0.22, base rate 0.19).</li>
+      <li><b>C2 (the boundary is load-bearing, observed).</b> The same forest scores 0.92 under a random
+      split and 0.60 under client-grouping; the gap measures memorisation, so the number must travel with
+      its split.</li>
+      <li><b>C3 (a proxy, disclosed).</b> The label is a <i>definition</i> derived from click-through
+      rate, not an observed business outcome, so every result is decision-support and directional — no
+      causal claim is made anywhere.</li>
+    </ol>
+    <div class="p-call"><b>What this is not.</b> Cross-sectional, single-snapshot data never supports
+    "editing this page will raise clicks." This work supports an <i>ordering of human attention</i>; it
+    does not establish that a refresh causes anything.</div>
+  </section>
+
+  <section id="data">
+    <h2>2&nbsp;&nbsp;Data</h2>
+    <h3>2.1&nbsp;&nbsp;Source, unit, window</h3>
+    <p>Source is the <b>anonymised FlyRank ML Internship starter release</b>: one row per pseudonymised
+    content page, 30,000 pages across 32 clients, with 44 columns of ninety-day search, session, and
+    content-metadata fields. Identifiers (<code>content_id</code>, <code>client_id</code>) are
+    pseudonymous and used for <b>grouping and joining only — never as features</b>. All metrics are
+    ninety-day, rolling-window observations; there is no daily fact table in this release, so the
+    validation is cross-sectional and grouped, not time-forward (see §5).</p>
+    <h3>2.2&nbsp;&nbsp;Decision slice</h3>
+    <p>To keep the label meaningful and the ranking decision-relevant, we restrict to pages that have a
+    measurable footprint and a position on the page-one / striking-distance range:</p>
+    <pre>slice = impressions_90d >= 500  AND  0 < avg_position <= 20     →  12,023 pages / 28 clients</pre>
+    <p>Newly published pages, very-low-visibility pages, and pages with missing position
+    (<code>avg_position = 0</code>, 1,205 rows in the full release) fall outside this slice by design,
+    and the queue cannot speak for them.</p>
+    <h3>2.3&nbsp;&nbsp;What we excluded and why</h3>
+    <ul>
+      <li><b>Label-defining columns.</b> The proxy label is built from click-through rate, which is itself
+      <code>clicks_90d / impressions_90d</code>. So <code>clicks_90d</code>, <code>ctr</code>, and the
+      tier-relative <code>ctr_vs_tier</code> are <b>quarantined</b> — never features.</li>
+      <li><b>Label-family / trend columns.</b> <code>trend_direction</code>, <code>trend_pct</code>, and
+      <code>is_declining_label</code> encode a different outcome and are excluded outright.</li>
+      <li><b>Identifiers.</b> <code>content_id</code> (unique per row) and <code>client_id</code>
+      (grouping) never enter the feature frame.</li>
+    </ul>
+    <h3>2.4&nbsp;&nbsp;Data quirks we honoured</h3>
+    <p>Rate columns are stored as percentages (×100), so the tier median is computed on the same scale.
+    <code>scroll_rate</code> carries missing values, and zero engagement/scroll values are frequently
+    <b>absent instrumentation rather than true low engagement</b> — a measurement trap we call out in the
+    review rules. Missingness follows <code>content_type</code>.</p>
+  </section>
+
+  <section id="method">
+    <h2>3&nbsp;&nbsp;Methodology</h2>
+    <h3>3.1&nbsp;&nbsp;The label (a proxy, stated plainly)</h3>
+    <p>We define <code>under_capturing</code> as a page whose click-through rate is below <b>half the
+    median CTR of its position tier</b>, among pages with at least 1,000 impressions:</p>
+    <pre>pos_tier   = bin(avg_position) into {top_3: 1–3, page_1: 4–10, striking: 11–20}
+ctr_vs_tier = ctr / median_ctr(pos_tier)
+under_capturing = (ctr_vs_tier < 0.50) AND (impressions_90d >= 1000)</pre>
+    <p>Base rate in the slice: <b>0.193</b>. This is a <b>definition, not an observed outcome</b>. It is
+    a deliberate stand-in for "captures fewer clicks than its position should," and its circularity —
+    it is derived from CTR — is the single most important caveat in this paper (§6, §7).</p>
+    <h3>3.2&nbsp;&nbsp;Features (all knowable at the decision moment)</h3>
+    <p>Nine numeric and six categorical fields, none of which define the label:
+    <code>impressions_90d, avg_position, content_age_days, days_since_last_update, sessions_90d,
+    engagement_rate, scroll_rate, word_count, search_volume</code>, plus <code>pos_tier, main_intent,
+    content_type, position_tier, age_tier, freshness_tier</code>. Every feature is an observed snapshot
+    field; no feature window contains a future label window.</p>
+    <h3>3.3&nbsp;&nbsp;Baseline first</h3>
+    <p>Following baseline-first practice, we built a transparent rule before any model: flag pages whose
+    CTR is below half the tier median and weight by volume,
+    <code>baseline_score = (ctr &lt; 0.5) × log1p(impressions_90d)</code>. It is a fair comparison because
+    it uses the same slice, the same metric, and the same folds as every model.</p>
+    <h3>3.4&nbsp;&nbsp;Models</h3>
+    <p>Ranking needs scores, not labels, so each classifier's predicted probability is used as the ranking
+    score. The ladder runs readable → stronger: logistic regression (standardised), a depth-2 and a
+    depth-3 decision tree (printable rules), and a 300-tree random forest. Seed 42 for every stochastic
+    component.</p>
+    <h3>3.5&nbsp;&nbsp;Validation design</h3>
+    <p><b>Client-grouped folds</b> (<code>GroupKFold(5)</code> on <code>client_id</code>): whole clients are
+    held out, so the model is tested on clients it has never seen. This is the honest split here — pages
+    from one site share templates, intent mix, and seasonality the model could otherwise memorise. We
+    report out-of-fold results only, next to the base rate.</p>
+    <h3>3.6&nbsp;&nbsp;Leakage checks (all run in code)</h3>
+    <ul>
+      <li><b>Train-without test.</b> Adding <code>clicks_90d</code> back into the features pushes
+      precision@50 from 0.86 toward <b>1.00</b> — the confession that it reads the label back. It stays out.</li>
+      <li><b>Column audit.</b> Assert the banned list (<code>clicks_90d, ctr, ctr_vs_tier, trend_*,
+      is_declining_label, content_id, client_id</code>) is absent from the feature frame — it is.</li>
+      <li><b>Split integrity.</b> Assert no client straddles a train/test boundary in the grouped split — none does.</li>
+    </ul>
+  </section>
+
+  <section id="results">
+    <h2>4&nbsp;&nbsp;Results</h2>
+    <p>All methods are scored on <b>identical client-grouped folds</b> (GroupKFold(5), seed 42), so the
+    comparison is apples-to-apples. The base rate (0.193) is shown separately because it is the label's
+    natural frequency, not a fitted method.</p>
+    <table>
+      <caption><b>Table 1.</b> Ranking quality on client-grouped folds. Precision@K is the share of the
+      top-K queue that is truly under-capturing; ROC-AUC and average precision are discrimination
+      summaries. All models use probability-as-score. Base rate 0.193; n = 12,023 across 28 clients.</caption>
+      <thead><tr><th>method</th><th>P@20</th><th>P@50</th><th>P@100</th><th>ROC-AUC</th><th>AP</th></tr></thead>
+      <tbody>
+        <tr><td>baseline rule (transparent)</td><td class="num">0.30</td><td class="num">0.22</td><td class="num">0.24</td><td class="num">0.653</td><td class="num">0.246</td></tr>
+        <tr><td>logistic regression</td><td class="num">0.65</td><td class="num">0.58</td><td class="num">0.56</td><td class="num">0.607</td><td class="num">0.265</td></tr>
+        <tr><td>decision tree (depth 2)</td><td class="num">0.45</td><td class="num">0.50</td><td class="num">0.49</td><td class="num">0.712</td><td class="num">0.328</td></tr>
+        <tr><td>decision tree (depth 3)</td><td class="num">0.65</td><td class="num">0.66</td><td class="num">0.63</td><td class="num">0.744</td><td class="num">0.404</td></tr>
+        <tr class="win"><td>random forest (300 trees)</td><td class="num">0.45</td><td class="num">0.60</td><td class="num">0.64</td><td class="num">0.777</td><td class="num">0.436</td></tr>
+      </tbody>
+    </table>
+    <p>The random forest has the highest average precision and ROC-AUC and the best precision@50 and
+    @100; the depth-3 tree is competitive at the very head (P@20) while staying printable. Every learned
+    method beats the rule's ranking on discrimination (ROC-AUC), and all sit far above the 0.193 base
+    rate — so the model carries real, generalisable signal, not just the label's frequency.</p>
+
+    <figure>
+      <img src="img/fig1_precision_at_k.png" alt="Precision at K for the baseline rule, logistic regression, depth-3 tree and random forest on client-grouped folds, with the base rate shown as a dashed line at 0.19.">
+      <figcaption><b>Figure 1.</b> Precision@K on client-grouped folds (higher is better). The random
+      forest leads across K = 50–100; no method clears the base rate at K = 20 except through luck of
+      ordering. Same folds for every curve.</figcaption>
+    </figure>
+
+    <h3>4.1&nbsp;&nbsp;The evaluation boundary is load-bearing (C2)</h3>
+    <p>The same random forest, with the same features, scores <b>0.92 precision@50 under a random
+    5-fold split</b> and <b>0.60 under client-grouping</b>. Only the split changes. The 0.32 gap is the
+    memorisation the grouping removes: under a random split the model partly recognises <i>which client</i>
+    a page came from. The honest number is the grouped one, and the gap is itself a finding — a random-split
+    headline would have overstated the ranking's real-world quality by more than half.</p>
+    <figure>
+      <img src="img/fig2_split_gap.png" alt="Bar chart comparing random forest precision@50 under a random split (0.92) and a grouped-client split (0.60), with base rate 0.19.">
+      <figcaption><b>Figure 2.</b> Same model, same features — only the split changes. Random rows let the
+      model memorise client identity; grouping removes it and reveals the honest 0.60.</figcaption>
+    </figure>
+  </section>
+
+  <section id="interp">
+    <h2>5&nbsp;&nbsp;Interpretation</h2>
+    <p><b>What the model leans on.</b> Permutation importance from the Week-5 model puts
+    <code>impressions_90d</code> first, then <code>sessions_90d</code>, <code>engagement_rate</code>, and
+    <code>content_age_days</code>. These are sensible, observable signals — a page's own downside is
+    visible in its volume and engagement — and none of them is the label ingredient.</p>
+    <p><b>Where it fails.</b> The top of the queue carries a repeatable false-positive signature: pages
+    with <code>engagement_rate = 0</code>. The model reads a zero as "weak capture," but zero is
+    frequently <b>missing instrumentation</b>, so these are measurement artefacts promoted into
+    rankings — which is exactly why the review rules require checking instrumentation first.</p>
+    <p><b>A negative result we keep.</b> Scroll depth shows little separation between the under-capturing
+    and healthy groups in this slice. We report it because pruning a plausible-but-weak feature story is
+    a result, not a failure.</p>
+    <h3>5.1&nbsp;&nbsp;The decay pattern (observed, directional)</h3>
+    <p>Across age buckets, the share of pages flagged as under-capturing rises from <b>0.03 among pages
+    under 90 days old to 0.24 among pages over a year old</b> — a monotone-ish climb that mirrors the
+    dataset's own lifecycle story. Read honestly: in <i>this</i> portfolio, older pages are
+    <b>associated with</b> lower tier-relative CTR. This is an observational comparison — it says nothing
+    about whether refreshing an old page will restore its clicks (that needs an experiment). It is a
+    <i>reason to look</i>, not a lever.</p>
+    <figure>
+      <img src="img/fig3_decay.png" alt="Line chart of proxy under-capture rate by content-age bucket rising from about 0.03 for 0-90 days to about 0.24 for 365+ days, with base rate 0.19.">
+      <figcaption><b>Figure 3.</b> Under-capture rate by content age (observed). The climb is directional
+      and cohort-level; it does not establish that refreshing older pages causes clicks to rise.</figcaption>
+    </figure>
+  </section>
+
+  <section id="limits">
+    <h2>6&nbsp;&nbsp;Limitations &amp; honest framing</h2>
+    <div class="p-ladder">
+      <b>Claim ladder used throughout:</b> <i>observed</i> (a pattern in this dataset) ·
+      <i>measured</i> (a comparison between methods) · <i>directional</i> (an association we would not
+      over-read) · <i>decision-support</i> (helps a person choose where to look). No causal verbs appear.
+    </div>
+    <ul>
+      <li><b>The label is a proxy.</b> <code>under_capturing</code> is defined <i>from</i> CTR, so part of
+      the measured ranking skill reflects that definition rather than independent truth. Any feature
+      correlated with CTR (<code>impressions_90d</code>, <code>sessions_90d</code>) carries a weaker
+      version of the same circularity.</li>
+      <li><b>No causal claim.</b> Nothing here shows that refreshing a flagged page changes its outcome;
+      that requires a controlled experiment this project did not run.</li>
+      <li><b>One snapshot, one portfolio.</b> The starter release is cross-sectional; patterns need not
+      transfer to another site, and a time-forward evaluation was not possible without a daily fact
+      table.</li>
+      <li><b>Modest absolute precision.</b> The grouped precision@K (0.45–0.66 depending on K and method)
+      is well above the 0.19 base rate but far from a guarantee; the queue's ordering is real, its
+      hit-rate is not high.</li>
+      <li><b>Measurement traps.</b> Zero <code>scroll_rate</code>/<code>engagement_rate</code> values are
+      often missing data, not truth, and they sit at the top of the queue.</li>
+      <li><b>Survivorship by design.</b> The slice keeps pages with ≥500 impressions; absent pages are not
+      evidence of health.</li>
+      <li><b>A negative result.</b> Scroll depth did not separate the groups in this slice — reported, not
+      hidden.</li>
+    </ul>
+  </section>
+
+  <section id="recs">
+    <h2>7&nbsp;&nbsp;Ranked recommendations (action playbook)</h2>
+    <p>The model <b>orders</b>; a human <b>decides</b>. The queue carries, for each page: a score, a rank,
+    a one-line <b>reason code</b> drawn from observable signals, and an archetype→action mapping. The
+    reason code is <i>annotation for people</i> — it may reference the tier-relative ratio, which is
+    never a model feature — so the ranking stays leakage-safe while the explanation stays readable.</p>
+    <figure>
+      <img src="img/fig4_reason_codes.png" alt="Horizontal bar chart of queue pages by reason code: engagement_gap_scan 6359, below_par_capture 3479, striking_distance_push 1753, high_volume_low_ctr 384, thin_content_low_capture 48.">
+      <figcaption><b>Figure 4.</b> Composition of the ranked queue by reason code (12,023 pages). The
+      dominant group is an engagement-scanability signal — often a measurement artefact to verify first.</figcaption>
+    </figure>
+    <p><b>What a reviewer does, in order:</b></p>
+    <ol>
+      <li><b>Verify instrumentation.</b> If the reason is <code>engagement_gap_scan</code>, confirm the
+      page is instrumented before acting — zeros are often missing data.</li>
+      <li><b>Apply the action.</b> <code>high_volume_low_ctr</code> → tighten title/meta around clear
+      intent; <code>striking_distance_push</code> → strengthen relevance and internal links;
+      <code>thin_content_low_capture</code> → expand with real subtopics (no padding);
+      <code>below_par_capture</code> → review title/meta and opening promise.</li>
+      <li><b>Log the follow-up window.</b> Record the page and its 30-day outcome so the queue can be
+      assessed later.</li>
+    </ol>
+    <p><b>The no-go list (never automated):</b> no auto-publishing or auto-editing; no auto-refresh
+    scheduling; no deleting, redirecting, or de-indexing; no client-facing decisions from these scores;
+    no treating a score as proof of lost revenue; no production pipeline without a new controlled design.</p>
+    <p><b>Monitoring / retrain triggers:</b> regenerate monthly (snapshot age &gt; 30 days); re-fit if the
+    label base rate moves &gt; ±25% from 0.193; retire the queue if grouped precision@20 drops below ~1.5×
+    the base rate; re-derive on any schema change; pause if reviewers repeatedly find the queue head wrong.</p>
+    <p><b>Cost/value.</b> Inference is negligible next to a human review slot; the queue's value is
+    concentrating scarce review time, and its cost of being wrong is bounded by the human check.</p>
+  </section>
+
+  <section id="repro">
+    <h2>8&nbsp;&nbsp;Reproducibility</h2>
+    <div class="p-repro">
+      <div>
+        <h4>Environment</h4>
+        <pre>python        3.12
+scikit-learn  1.9.1
+pandas        3.0.6
+numpy         2.5.4
+seed          42 (all stochastic models)
+data          anonymised starter release,
+              revision-pinned in the repo</pre>
+      </div>
+      <div>
+        <h4>Run</h4>
+        <pre>git clone https://github.com/omar320250068-prog/flyrank-ml-internship
+pip install -r requirements.txt
+# execute notebooks in card order:
+#   w01 → w02 → w03 → w04 → w05 → w06 → w07 → capstone
+# each notebook runs top to bottom;
+# metrics receipts land in work/outputs/</pre>
+      </div>
+    </div>
+    <table>
+      <caption><b>Table 2.</b> Result-to-notebook map. Every number above regenerates from a committed
+      receipt or notebook cell.</caption>
+      <thead><tr><th>result</th><th>regenerated by</th></tr></thead>
+      <tbody>
+        <tr><td>Table 1 (model-vs-baseline, grouped folds)</td><td><code>capstone.ipynb → work/outputs/capstone_core_metrics.json</code></td></tr>
+        <tr><td>Figure 1 (precision@K)</td><td><code>capstone.ipynb — figures cell</code></td></tr>
+        <tr><td>Figure 2 (split gap)</td><td><code>w06_validation_audit.ipynb → work/outputs/w06_validation_audit.json</code></td></tr>
+        <tr><td>Figure 3 (decay)</td><td><code>w07_action_playbook.ipynb → work/outputs/w07_playbook_metrics.json</code></td></tr>
+        <tr><td>Figure 4 (reason codes) + queue CSV (regenerable)</td><td><code>w07_action_playbook.ipynb — exports cell</code></td></tr>
+      </tbody>
+    </table>
+    <p class="p-links">→ <a href="https://github.com/omar320250068-prog/flyrank-ml-internship">Source repository</a>
+      · <a href="https://github.com/omar320250068-prog/flyrank-ml-internship/tree/main/work/notebooks">Executed notebooks</a>
+      · <a href="https://github.com/omar320250068-prog/flyrank-ml-internship/tree/main/work/outputs">Metrics receipts (JSON)</a></p>
+  </section>
+
+  <section id="ack" class="p-ack">
+    <h2>Acknowledgments &amp; data credit</h2>
+    <p>Built on the <b>FlyRank ML Internship dataset</b> —
+      <a href="https://flyrank.ai">flyrank.ai</a>. Crediting the data source is standard research practice.
+      All data used here is pseudonymised; no client names, URLs, or private queries appear anywhere in
+      this work.</p>
+    <h3>References</h3>
+    <ul>
+      <li><a href="https://developers.google.com/machine-learning/guides/rules-of-ml">Google · Rules of Machine Learning (baseline-first)</a>.</li>
+      <li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GroupKFold.html">scikit-learn · GroupKFold</a>.</li>
+      <li><a href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html">scikit-learn · RandomForestClassifier</a>.</li>
+      <li><a href="https://neurips.cc/public/guides/PaperChecklist">NeurIPS · Paper Checklist</a>.</li>
+    </ul>
+  </section>
+
+  <p class="p-foot">Decision-support research · no causal claims · claims phrased as observed, measured,
+  directional, decision-support.</p>
+
+</article>
+</body>
+</html>
