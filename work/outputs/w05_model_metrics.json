@@ -1,0 +1,52 @@
+{
+  "lane": "CTR / Engagement Opportunity Scoring",
+  "split": "client-holdout GroupShuffleSplit test_size=0.25 seed=42",
+  "n_train": 11199,
+  "n_test": 824,
+  "test_base_rate": 0.1541,
+  "excluded_features": [
+    "clicks_90d",
+    "ctr",
+    "ctr_vs_tier",
+    "trend_direction",
+    "trend_pct",
+    "is_declining_label"
+  ],
+  "results": {
+    "baseline_rule": {
+      "@20": 0.0,
+      "@50": 0.12,
+      "@100": 0.22,
+      "roc_auc": 0.7201,
+      "avg_prec": 0.2281
+    },
+    "logreg": {
+      "@20": 0.2,
+      "@50": 0.24,
+      "@100": 0.26,
+      "roc_auc": 0.7169,
+      "avg_prec": 0.253
+    },
+    "tree_d2": {
+      "@20": 0.35,
+      "@50": 0.32,
+      "@100": 0.3,
+      "roc_auc": 0.7755,
+      "avg_prec": 0.3009
+    },
+    "tree_d3": {
+      "@20": 0.45,
+      "@50": 0.5,
+      "@100": 0.52,
+      "roc_auc": 0.8533,
+      "avg_prec": 0.4434
+    },
+    "random_forest": {
+      "@20": 0.65,
+      "@50": 0.64,
+      "@100": 0.6,
+      "roc_auc": 0.8817,
+      "avg_prec": 0.5582
+    }
+  }
+}
