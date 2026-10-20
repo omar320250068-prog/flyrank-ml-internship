@@ -1,0 +1,16 @@
+{
+  "lane": "CTR / Engagement Opportunity Scoring",
+  "slice": "impressions_90d>=500 & 0<avg_position<=20",
+  "n": 12023,
+  "label": "under_capturing = ctr_vs_tier<0.50 & impressions_90d>=1000 (defined proxy)",
+  "base_rate": 0.1929,
+  "rule": "(ctr<0.5) * log1p(impressions_90d)",
+  "reason_code": "low_ctr_high_volume",
+  "action_label": "review_title_meta",
+  "precision_at": {
+    "@20": 0.3,
+    "@50": 0.22,
+    "@100": 0.24
+  },
+  "flagged_rows": 9759
+}
