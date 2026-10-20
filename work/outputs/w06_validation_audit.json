@@ -1,0 +1,36 @@
+{
+  "notebook": "w06_validation_audit",
+  "lane": "CTR / Engagement Opportunity Scoring",
+  "label": "under_capturing = (ctr_vs_tier < 0.50) & (impressions_90d >= 1000)",
+  "slice_rows": 12023,
+  "n_clients": 28,
+  "base_rate": 0.19288031273392664,
+  "before_after": [
+    {
+      "split": "random (4-fold, too easy)",
+      "P@20": 0.9,
+      "P@50": 0.86,
+      "ROC_AUC": 0.8413660566658384,
+      "AP": 0.5389991914273653
+    },
+    {
+      "split": "grouped-client (4-fold, honest)",
+      "P@20": 0.45,
+      "P@50": 0.58,
+      "ROC_AUC": 0.7804542709123208,
+      "AP": 0.4303767546347903
+    },
+    {
+      "split": "base_rate",
+      "P@20": 0.19288031273392664,
+      "P@50": 0.19288031273392664,
+      "ROC_AUC": 0.5,
+      "AP": 0.19288031273392664
+    }
+  ],
+  "memorisation_gap": {
+    "P@20": 0.45,
+    "ROC_AUC": 0.06091178575351763,
+    "AP": 0.108622436792575
+  }
+}
