@@ -1,0 +1,40 @@
+{
+  "notebook": "w07_action_playbook",
+  "lane": "CTR / Engagement Opportunity Scoring",
+  "label_proxy": "under_capturing = (ctr_vs_tier < 0.50) & (impressions_90d >= 1000)",
+  "queue_rows": 12023,
+  "base_rate": 0.193,
+  "oof_precision_at_20": 0.75,
+  "oof_precision_at_50": 0.72,
+  "reason_code_counts": {
+    "engagement_gap_scan": 6359,
+    "below_par_capture": 3479,
+    "striking_distance_push": 1753,
+    "high_volume_low_ctr": 384,
+    "thin_content_low_capture": 48
+  },
+  "under_capture_rate_by_age_bucket": {
+    "0-90": 0.028,
+    "91-180": 0.176,
+    "181-270": 0.211,
+    "271-365": 0.181,
+    "365+": 0.235
+  },
+  "monitoring": {
+    "snapshot_label_base_rate": 0.193,
+    "n_clients_in_slice": 28,
+    "oof_precision_at_20": 0.75,
+    "oof_precision_at_20_over_base": 3.89,
+    "recommended_regeneration_days": 30,
+    "retrain_if_base_rate_moves_pct": 25,
+    "retire_if_precision_below_base_multiple": 1.5
+  },
+  "exports": {
+    "queue_csv": "work/outputs/action_playbook_queue.csv",
+    "figures": [
+      "work/figures/playbook_reason_codes.png",
+      "work/figures/playbook_decay_curve.png"
+    ]
+  },
+  "claims": "decision-support only; proxy label; no causal claim"
+}
